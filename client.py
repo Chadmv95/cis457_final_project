@@ -47,4 +47,4 @@ if __name__ == "__main__":
     while 1:
         temperature=get_temp(temperature)
         send_message(tempID, location, temperature)
-        time.sleep(5)
+        time.sleep(2)

@@ -4,10 +4,15 @@
 # Server will accept multiple clients and listens for certain messages to search for files
 
 from threading import Thread
+import threading
+from badgui import Chadster
 import socket
 import json
 import ast
 
+from tkinter import *
+
+app = Chadster()
 
 # Multithreaded Python server
 class ThreadedServer(Thread):
@@ -36,6 +41,9 @@ class ThreadedServer(Thread):
                 if "status" == data["MessageType"]:
                     # message should already be in correct form, append to list
                     return_message = {"Result": "Success"}
+
+                    app.refresh(["this is bad", "yes it is"], [3, 10])
+                    
                     print("Probe ID: ", data["ProbeID"], "\tLocation: ", data["Location"], "\tTemperature: ",
                           data["Temperature"])
 
@@ -48,6 +56,9 @@ class ThreadedServer(Thread):
                     print("Error: Can't send response..")
                     self.conn.send(json.dumps({"Result": "Error"}).encode('utf-8'))
 
+# gui thread
+def gui():
+    root.mainloop()
 
 # Multithreaded Python server : TCP Server Socket Program
 TCP_IP = '127.0.0.1'
@@ -62,6 +73,10 @@ threads=[]
 # store user information
 users_list = []
 
+#thread gui
+t1 = threading.Thread(target=gui, args=())
+t1.start()
+
 while True:
     tcpServer.listen(4)
     print("Multithreaded Python server : Waiting for connections from TCP clients...")
@@ -69,4 +84,4 @@ while True:
     newthread = ThreadedServer(conn,ip, port)
     newthread.start()
     threads.append(newthread)
-
+    
