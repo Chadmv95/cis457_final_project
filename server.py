@@ -4,10 +4,14 @@
 # Server will accept multiple clients and listens for certain messages to search for files
 
 from threading import Thread
+import threading
 import socket
 import json
 import ast
+import time
 
+database = []
+# database = [dict() for x in range(10)]
 
 # Multithreaded Python server
 class ThreadedServer(Thread):
@@ -36,8 +40,18 @@ class ThreadedServer(Thread):
                 if "status" == data["MessageType"]:
                     # message should already be in correct form, append to list
                     return_message = {"Result": "Success"}
-                    print("Probe ID: ", data["ProbeID"], "\tLocation: ", data["Location"], "\tTemperature: ",
-                          data["Temperature"])
+
+                    i = 0
+                    # check if id is already in the database
+                    for index in range(len(database)):
+                        c = database[index] 
+                        if data["ProbeID"] == c["ProbeID"]:
+                            database[index] = data
+                            break
+                        else:
+                            i = i+1
+                    if i == len(database):
+                        database.append(data)
 
                 else:
                     return_message = {"Result": "Error"}
@@ -47,6 +61,20 @@ class ThreadedServer(Thread):
                 except ValueError:
                     print("Error: Can't send response..")
                     self.conn.send(json.dumps({"Result": "Error"}).encode('utf-8'))
+
+
+    
+
+# gui thread
+def gui():
+    while True: 
+        print("\n-----------------------------------------------------------")
+        print("index  |      ProbeID       |     Location      |      Temperature(C)" )
+        for index in range(len(database)):  
+            c = database[index]
+            print(" ", index, "             ", c["ProbeID"], "               ", c["Location"], "              ", c["Temperature"])
+        print("-----------------------------------------------------------")
+        time.sleep(.5)
 
 
 # Multithreaded Python server : TCP Server Socket Program
@@ -62,11 +90,16 @@ threads=[]
 # store user information
 users_list = []
 
+#thread gui
+print("Multithreaded Python server : Waiting for connections from TCP clients...")
+t1 = threading.Thread(target=gui, args=())
+t1.start()
+
 while True:
     tcpServer.listen(4)
-    print("Multithreaded Python server : Waiting for connections from TCP clients...")
     (conn, (ip,port)) = tcpServer.accept()
     newthread = ThreadedServer(conn,ip, port)
     newthread.start()
     threads.append(newthread)
-
+    
+    
