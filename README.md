@@ -9,5 +9,5 @@ clients
   client.py
   This script simulates a signal. Instead of reading the temperature sensor we return some interger. This way we can develop without having to set up the actual controller. 
 
-  clint1-3.py
+  client1-3.py
   Three clients are in the directory.  Each individual client is hardcoded per our cooresponding sensor IDs.  We did this for simplicity during presentation instead having to type the complex ID name for each instance of client. 
